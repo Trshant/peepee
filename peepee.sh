@@ -15,6 +15,20 @@
 
 # TODO should add colours to the output
 
+__HELP="
+Usage: $(basename $0) [OPTIONS]
+
+Options:
+  -n, --new <dir_name>         Creates a directory and then creates a .venv
+  in it.
+  -i, --init                   Creates a venv in current directory.
+  -a, --add <package>          Adds the python package asked for.
+  --help                       Shows this text.
+  -r, --run <command>          Runs the command.
+"
+
+
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -n|--new) 
@@ -25,9 +39,9 @@ while [[ "$#" -gt 0 ]]; do
             echo "$dirname directory created!" 
             shift ;;
         -a|--add) 
-            if [[ -d "$PWD"+"/.venv" ]]
+            if [[ -d "$PWD/.venv" ]]
             then
-              source "$PWD"+"/.venv/bin/activate"
+              source $PWD/.venv/bin/activate
               pip install $2
               deactivate
               echo "Added the package $2 to the local environment"
@@ -36,23 +50,33 @@ while [[ "$#" -gt 0 ]]; do
             fi
             shift ;;
         -i|--init)
-            if [[ -d "$PWD"+"/.venv" ]]
+            echo "$PWD/.venv"
+            if [[ -d "$PWD/.venv" ]]
             then
-                python -m venv .venv
-                echo "env created!"
-            else
                 echo "env present!"
+            else
+                python3 -m venv .venv
+                echo "env created!"
+            fi
             # TODO check if file exists, then add from requirements
             shift;;
         -r|--run) 
-            shift; 
-            commmand="$@"
-            # TODO : run the actual command
+            source $PWD/.venv/bin/activate
+            shift
+            command="$@"
+            echo "$command"
+            eval "$command"
+            # TODO : run the actual command, also a flag need to be set so that the default will not scream about Unknown Parameter
             ;;
-        --help) 
+        --help)
+            echo "$__HELP" 
             # TODO : help!
             ;;
-        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+        *) 
+          echo "Unknown parameter passed: $1";
+          echo "$__HELP"
+          exit 1 ;;
+ 
     esac
     shift
 done
